@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const Document = require('./schema')
+const Document = require('./models/document')
 
 require('dotenv').config();
 
