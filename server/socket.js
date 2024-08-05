@@ -11,7 +11,7 @@ const socketConnection = (server) => {
 
     io.on("connection", (socket) => {
         socket.on("get-document", async (documentId) => {
-            const document = await findOrCreateDocument(documentId);
+            const document = await findDocument(documentId);
             socket.join(documentId);
             socket.emit("load-document", document.data);
 
@@ -25,12 +25,12 @@ const socketConnection = (server) => {
         });
     });
 
-    async function findOrCreateDocument(id) {
+    async function findDocument(id) {
         if (id == null) return;
 
         const document = await Document.findById(id);
         if (document) return document;
-        return await Document.create({ _id: id, data: "" }); // Adjust default data as needed
+        return null;
     }
 };
 
