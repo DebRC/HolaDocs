@@ -44,6 +44,38 @@ router.get('/create', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.get('/title/:id', async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if(!decoded) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const document = await Document.findById(req.params.id);
+        res.status(200).json({ title: document.title });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.post('/rename', async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if(!decoded) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        const document = await Document.findById(req.body._id);
+        document.title = req.body.title;
+        await document.save();
+        res.status(200).json({ document });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
         
 
 module.exports = router;
