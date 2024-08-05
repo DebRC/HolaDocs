@@ -61,6 +61,10 @@ const HomePage = () => {
         localStorage.removeItem('token');
         navigate('/login');
     }
+    function handleSignup() {
+        localStorage.removeItem('token');
+        navigate('/signup');
+    }
 
     const handleGoToRoot = () => {
         navigate('/');
@@ -88,9 +92,17 @@ const HomePage = () => {
         <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: '#808080' }}>
                 <h1 style={{ fontFamily: '"Roboto", sans-serif', fontSize: '24px', cursor: 'pointer' }} onClick={handleGoToRoot}>HolaDocs</h1>
-                {isLoggedIn && <button onClick={handleLogout} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Logout</button>}
-                {!isLoggedIn && <button onClick={handleLogin} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Login</button>}
-
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    {isLoggedIn && (
+                        <button onClick={handleLogout} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Logout</button>
+                    )}
+                    {!isLoggedIn && (
+                        <>
+                            <button onClick={handleLogin} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Login</button>
+                            <button onClick={handleSignup} style={{ backgroundColor: '#007bff', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer', marginLeft: '10px' }}>Sign Up</button>
+                        </>
+                    )}
+                </div>
             </div>
             {!isLoggedIn ? (
                 <div style={{ textAlign: 'center', marginTop: '20px' }}>
