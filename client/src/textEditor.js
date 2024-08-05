@@ -3,6 +3,7 @@ import Quill from "quill"
 import "quill/dist/quill.snow.css"
 import { io } from 'socket.io-client'
 import { useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
 const SAVE_INTERVAL_MS=2000
 const SERVER_URI='http://localhost:3001'
@@ -29,6 +30,17 @@ export default function TextEditor() {
             s.disconnect()
         }
     }, [])
+
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setIsLoggedIn(false); // Show login dialog if not logged in
+            navigate('/');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         if (socket == null || quill == null) return
@@ -86,5 +98,28 @@ export default function TextEditor() {
         q.setText("Loading...")
         setQuill(q)    
     }, [])
-    return <div className="editor" ref={wrapperRef}></div>
+
+    function handleLogout() {
+        localStorage.removeItem('token');
+        navigate('/');
+        window.location.reload();
+    }
+    function handleLogin() {
+        localStorage.removeItem('token');
+        navigate('/login');
+    }
+
+    const handleGoToRoot = () => {
+        navigate('/');
+        window.location.reload();
+    }
+    return <>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: '#808080' }}>
+                <h1 style={{ fontFamily: '"Roboto", sans-serif', fontSize: '24px', cursor: 'pointer' }} onClick={handleGoToRoot}>HolaDocs</h1>
+                {isLoggedIn && <button onClick={handleLogout} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Logout</button>}
+                {!isLoggedIn && <button onClick={handleLogin} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Login</button>}
+
+            </div>
+    <div className="editor" ref={wrapperRef}></div>
+    </>
 }
