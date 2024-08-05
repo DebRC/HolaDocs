@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import axios from 'axios';
 import Quill from "quill"
 import "quill/dist/quill.snow.css"
 import { io } from 'socket.io-client'
@@ -88,6 +89,26 @@ export default function TextEditor() {
         }
       }, [socket, quill])
 
+    const [fileName, setFileName] = useState('');
+
+      useEffect(() => {
+        const fetchTitle = async () => {
+            try {
+                const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+                const response = await axios.get(`http://localhost:3001/api/user/documents/title/${documentId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setFileName(response.data.title);
+            } catch (error) {
+                console.error('Error fetching title:', error);
+            }
+        };
+    
+        fetchTitle();
+    }, [documentId]);
+
     const wrapperRef = useCallback((wrapper) => {
         if (wrapper == null) return
         wrapper.innerHTML = ""
@@ -113,13 +134,44 @@ export default function TextEditor() {
         navigate('/');
         window.location.reload();
     }
-    return <>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: '#808080' }}>
-                <h1 style={{ fontFamily: '"Roboto", sans-serif', fontSize: '24px', cursor: 'pointer' }} onClick={handleGoToRoot}>HolaDocs</h1>
-                {isLoggedIn && <button onClick={handleLogout} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Logout</button>}
-                {!isLoggedIn && <button onClick={handleLogin} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Login</button>}
 
+    
+    const handleFileNameChange = async (e) => {
+        const newFileName = e.target.value;
+        setFileName(newFileName);
+
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post('http://localhost:3001/api/user/documents/rename', {
+                _id: documentId,
+                title: newFileName
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        } catch (error) {
+            console.error('Error renaming file:', error);
+        }
+    };
+
+    return <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: '#808080' }}>
+                <h1 style={{ fontFamily: '"Roboto", sans-serif', fontSize: '24px', cursor: 'pointer' }} onClick={handleGoToRoot}>HolaDocs</h1>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <input 
+                        type="text" 
+                        value={fileName} 
+                        onChange={handleFileNameChange} 
+                        style={{ marginRight: '10px', padding: '5px', borderRadius: '5px', border: '1px solid #ccc' }} 
+                    />
+                </div>
+                {isLoggedIn ? (
+                    <button onClick={handleLogout} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Logout</button>
+                ) : (
+                    <button onClick={handleLogin} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer' }}>Login</button>
+                )}
             </div>
-    <div className="editor" ref={wrapperRef}></div>
-    </>
+            <div className="editor" ref={wrapperRef}></div>
+        </>
 }
