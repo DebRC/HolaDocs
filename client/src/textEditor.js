@@ -66,7 +66,12 @@ export default function TextEditor() {
             quill.setContents(document)
             quill.enable()
         })
-        socket.emit('get-document', documentId)
+        socket.once('document-error', error => {
+            setErrorMsg(error);
+            setAccess(false);
+        })
+        const token = localStorage.getItem('token');
+        socket.emit('get-document', { documentId, token });
     }, [socket, quill, documentId])
 
     useEffect(() => {
@@ -161,7 +166,7 @@ export default function TextEditor() {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            });alert(`Your document is now visible. Share this link: \n${window.location.origin}/document/${documentId}`);
+            });alert(`Your document is now visible to others. Share this link: \n${window.location.origin}/document/${documentId}`);
         } catch (error) {
             if(error.response.status === 400){
                 alert(`Document already shared. Share this link: \n${window.location.origin}/document/${documentId}`);
