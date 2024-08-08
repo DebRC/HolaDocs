@@ -1,3 +1,4 @@
+const axios = require('axios');
 const Document = require('./models/document');
 require('dotenv').config();
 
@@ -10,18 +11,28 @@ const socketConnection = (server) => {
     });
 
     io.on("connection", (socket) => {
-        socket.on("get-document", async (documentId) => {
-            const document = await findDocument(documentId);
-            socket.join(documentId);
-            socket.emit("load-document", document.data);
+        socket.on("get-document", async ({ documentId, token }) => {
+            try {
+                await axios.get(`${process.env.SERVER_URI}/api/user/documents/checkAccess/${documentId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const document = await findDocument(documentId);
+                socket.join(documentId);
+                socket.emit("load-document", document.data);
 
-            socket.on("send-changes", (delta) => {
-                socket.broadcast.to(documentId).emit("receive-changes", delta);
-            });
+                socket.on("send-changes", (delta) => {
+                    socket.broadcast.to(documentId).emit("receive-changes", delta);
+                });
 
-            socket.on("save-document", async (data) => {
-                await Document.findByIdAndUpdate(documentId, { data });
-            });
+                socket.on("save-document", async (data) => {
+                    await Document.findByIdAndUpdate(documentId, { data });
+                });
+            } catch (error) {
+                socket.emit("document-error", error.response.data.error);
+            }
+
         });
     });
 
