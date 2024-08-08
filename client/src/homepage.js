@@ -10,7 +10,8 @@ const HomePage = () => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
-            setIsLoggedIn(false); // Show login dialog if not logged in
+            localStorage.removeItem('token');
+            setIsLoggedIn(false);
         } else {
             fetchDocuments(token);
         }

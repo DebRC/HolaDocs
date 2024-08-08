@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
         if (!user){
             return res.status(404).send({ error: 'User does not exist. Please Sign Up.' });
         }
-        if(req.body.password !== user.password) {
+        if(!(await user.comparePassword(req.body.password))){
             return res.status(401).send({ error: 'Incorrect Password.' });
         }
         const token = jwt.sign({ id: user.username }, process.env.JWT_SECRET);
