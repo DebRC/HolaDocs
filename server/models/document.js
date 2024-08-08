@@ -2,7 +2,8 @@ const { Schema, model } = require('mongoose');
 
 const documentSchema = new Schema({
     title: String,
-    data: Object
+    data: Object,
+    shared: Boolean,
 });
 
 module.exports = model('Document', documentSchema);
